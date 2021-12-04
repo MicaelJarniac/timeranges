@@ -94,7 +94,36 @@ pip install git+git://github.com/MicaelJarniac/timeranges
 For more examples, see the [full documentation][docs].
 
 ```python
+from datetime import time
+
 from timeranges import TimeRange, TimeRanges, WeekRange, Weekday
+
+
+# Create a `TimeRange` instance with the interval "0:00 -> 10:00"
+time_range = TimeRange(time(0), time(10))
+
+# Check if these times are contained in `time_range`
+assert time(0) in time_range
+assert time(5) in time_range
+assert time(10) in time_range
+
+# Check if these times aren't contained in `time_range`
+assert time(10, 0, 1) not in time_range
+assert time(11) not in time_range
+assert time(20) not in time_range
+
+
+time_range_2 = TimeRange(time(15), time(20))
+time_ranges = TimeRanges([time_range, time_range_2])
+
+assert time(0) in time_ranges
+assert time(5) in time_ranges
+assert time(10) in time_ranges
+assert time(12) not in time_ranges
+assert time(15) in time_ranges
+assert time(17) in time_ranges
+assert time(20) in time_ranges
+assert time(22) not in time_ranges
 ```
 
 ## Contributing

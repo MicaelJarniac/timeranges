@@ -5,6 +5,24 @@
   "imageSize": 100,
   "commit": false,
   "contributors": [
+    {
+      "login": "MicaelJarniac",
+      "name": "Micael Jarniac",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19514231?v=4",
+      "profile": "https://github.com/MicaelJarniac",
+      "contributions": [
+        "bug",
+        "code",
+        "doc",
+        "example",
+        "ideas",
+        "maintenance",
+        "projectManagement",
+        "review",
+        "tool",
+        "test"
+      ]
+    }
   ],
   "contributorsPerLine": 7,
   "badgeTemplate": "[badge-all-contributors]: https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg?style=flat-square",

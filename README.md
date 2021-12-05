@@ -93,10 +93,11 @@ pip install git+git://github.com/MicaelJarniac/timeranges
 ## Usage
 For more examples, see the [full documentation][docs].
 
+### TimeRange
 ```python
 from datetime import time
 
-from timeranges import TimeRange, TimeRanges, WeekRange, Weekday
+from timeranges import TimeRange
 
 
 # Create a `TimeRange` instance with the interval "0:00 -> 10:00"
@@ -111,9 +112,21 @@ assert time(10) in time_range
 assert time(10, 0, 1) not in time_range
 assert time(11) not in time_range
 assert time(20) not in time_range
+```
+
+### TimeRanges
+
+```python
+from datetime import time
+
+from timeranges import TimeRange, TimeRanges
 
 
+# Create some `TimeRange` instances
+time_range_1 = TimeRange(time(0), time(10))
 time_range_2 = TimeRange(time(15), time(20))
+
+# Create a `TimeRanges` instance containing multiple `TimeRange`
 time_ranges = TimeRanges([time_range, time_range_2])
 
 assert time(0) in time_ranges
@@ -124,6 +137,38 @@ assert time(15) in time_ranges
 assert time(17) in time_ranges
 assert time(20) in time_ranges
 assert time(22) not in time_ranges
+```
+
+### WeekRange
+```python
+from datetime import time, datetime
+
+from timematic.enums import Weekday
+from timeranges import TimeRange, TimeRanges, WeekRange
+
+week_range = WeekRange(
+    {
+        Weekday.MONDAY: TimeRanges(
+            [
+                TimeRange(time(5), time(10)),
+                TimeRange(time(12), time(14)),
+            ]
+        ),
+        Weekday.SATURDAY: TimeRanges(
+            [
+                TimeRange(time(0), time(2)),
+                TimeRange(time(4), time(8)),
+            ]
+        )
+    }
+)
+
+assert datetime(2021, 12, 6, 5, 0, 0) in week_range
+assert datetime(2021, 12, 6, 8, 0, 0) in week_range
+assert datetime(2021, 12, 6, 10, 0, 0) in week_range
+assert datetime(2021, 12, 6, 11, 0, 0) not in week_range
+assert datetime(2021, 12, 7, 5, 0, 0) not in week_range
+assert datetime(2021, 12, 13, 5, 0, 0) in week_range
 ```
 
 ## Contributing

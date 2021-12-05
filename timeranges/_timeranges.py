@@ -1,29 +1,10 @@
 from copy import deepcopy
 from datetime import datetime, time, timedelta, tzinfo
-from typing import Dict, Final, List, Optional, TypeVar
+from typing import Dict, List, Optional, TypeVar
 
 import attr
-
-from ._types import Weekday
-
-S_IN_H: Final = 3600
-S_IN_M: Final = 60
-US_IN_S: Final = 1000000
-
-
-def time_in_microseconds(time: time) -> int:
-    return (
-        time.hour * S_IN_H + time.minute * S_IN_M + time.second
-    ) * US_IN_S + time.microsecond
-
-
-def subtract_times(first: time, second: time) -> timedelta:
-    # Subtract two times
-    assert first.tzinfo == second.tzinfo, "Timezones must match"
-    return timedelta(
-        microseconds=time_in_microseconds(first) - time_in_microseconds(second)
-    )
-
+from timematic.enums import Weekday
+from timematic.utils import subtract_times
 
 _T_TimeRange = TypeVar("_T_TimeRange", bound="TimeRange")
 

@@ -63,9 +63,9 @@ We also recommend that you read [How to Contribute to Open Source](https://opens
       - [Coverage.py][coveragepy] <sup>[config][setup_cfg]</sup>
     - Documenting
       - [Sphinx][sphinx] <sup>[config][docs_conf_py]</sup>
-        - [Read the Docs Sphinx Theme][sphinx-rtd-theme]
+        - [Furo][furo]
         - [sphinxcontrib-spelling][sphinxcontrib-spelling]
-        - [recommonmark][recommonmark]
+        - [MyST][myst]
       - [Google style docstrings][docstring_google]
     - Building
       - [Setuptools][setuptools]
@@ -133,9 +133,9 @@ We also recommend that you read [How to Contribute to Open Source](https://opens
 [pytest-cov]: https://github.com/pytest-dev/pytest-cov
 [coveragepy]: https://github.com/nedbat/coveragepy
 [sphinx]: https://www.sphinx-doc.org
-[sphinx-rtd-theme]: https://github.com/readthedocs/sphinx_rtd_theme
+[furo]: https://github.com/pradyunsg/furo
 [sphinxcontrib-spelling]: https://github.com/sphinx-contrib/spelling
-[recommonmark]: https://github.com/readthedocs/recommonmark
+[myst]: https://github.com/executablebooks/myst-parser
 [docstring_google]: https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 [setuptools]: https://github.com/pypa/setuptools
 [conventionalcommits]: https://www.conventionalcommits.org

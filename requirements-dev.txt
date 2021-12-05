@@ -1,3 +1,4 @@
+-r docs/requirements.txt
 black==21.9b0
 build==0.7.0
 coverage==6.0.1
@@ -13,8 +14,4 @@ pydocstyle==6.1.1
 pytest==6.2.5
 pytest-cov==3.0.0
 python-semantic-release==7.19.2
-recommonmark==0.7.1
 semver==2.13.0
-Sphinx==4.2.0
-sphinx-rtd-theme==1.0.0
-sphinxcontrib-spelling==7.2.1

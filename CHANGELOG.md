@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.0 (2021-12-05)
+### Feature
+* update project template ([`81a65b4`](https://github.com/MicaelJarniac/timeranges/commit/81a65b401acf469442445c9b349a71fe6f1121d1))
+
+### Documentation
+* **readme:** more examples ([`7ff714f`](https://github.com/MicaelJarniac/timeranges/commit/7ff714f38aab3ba6cebc7ffac8b93b50aec0a077))
+
 ## v0.4.0 (2021-12-05)
 ### Feature
 * use timematic ([`55e4af2`](https://github.com/MicaelJarniac/timeranges/commit/55e4af232dbd5e02bd17f28f5796ad0ee4f0076e))

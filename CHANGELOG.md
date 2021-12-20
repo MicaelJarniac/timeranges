@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.0 (2021-12-20)
+### Feature
+* interpolate to `time.max` ([`dde5de0`](https://github.com/MicaelJarniac/timeranges/commit/dde5de017345638f5657e902b12ff4ba22d570ed))
+
+### Documentation
+* update .all-contributorsrc [skip ci] ([`e6b1dc1`](https://github.com/MicaelJarniac/timeranges/commit/e6b1dc15ac38d63528b6bed29d49f9b33e480392))
+* update README.md [skip ci] ([`6becae7`](https://github.com/MicaelJarniac/timeranges/commit/6becae7573fcfaed93e451120f27a9b53e298375))
+
 ## v0.5.0 (2021-12-05)
 ### Feature
 * update project template ([`81a65b4`](https://github.com/MicaelJarniac/timeranges/commit/81a65b401acf469442445c9b349a71fe6f1121d1))

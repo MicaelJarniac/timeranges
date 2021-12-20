@@ -67,6 +67,7 @@ class TimeRanges:
         self.sort()
         time_ranges = deepcopy(self.time_ranges)
         aux: List[TimeRange] = []
+
         # Merge overlapping time ranges
         for time_range in time_ranges:
             if not aux:
@@ -78,6 +79,11 @@ class TimeRanges:
                     aux_last.end = time_range.end
             else:
                 aux.append(time_range)
+
+        # Interpolate to `time.max`
+        if interpolate and subtract_times(time.max, aux[-1].end) <= interpolate:
+            aux[-1].end = time.max
+
         self.time_ranges = aux
         self.sort()
 

@@ -46,8 +46,11 @@ class TimeRange:
     def __attrs_post_init__(self) -> None:
         self.validate()
 
-    def __contains__(self, t: time) -> bool:
+    def contains(self, t: time) -> bool:
         return self.start <= t <= self.end
+
+    def __contains__(self, t: time) -> bool:
+        return self.contains(t)
 
 
 @attr.define
@@ -90,8 +93,11 @@ class TimeRanges:
     def __attrs_post_init__(self) -> None:
         self.validate()
 
-    def __contains__(self, t: time) -> bool:
+    def contains(self, t: time) -> bool:
         return any(t in time_range for time_range in self.time_ranges)
+
+    def __contains__(self, t: time) -> bool:
+        return self.contains(t)
 
 
 @attr.define
@@ -110,7 +116,7 @@ class WeekRange:
     def __attrs_post_init__(self) -> None:
         self.validate()
 
-    def __contains__(self, dt: datetime) -> bool:
+    def contains(self, dt: datetime) -> bool:
         tz = self.timezone
         if tz is not None:
             dt = dt.astimezone(tz)
@@ -119,3 +125,6 @@ class WeekRange:
         if day_range is not None:
             return dt.time() in day_range
         return False
+
+    def __contains__(self, dt: datetime) -> bool:
+        return self.contains(dt)

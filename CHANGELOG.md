@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.0 (2021-12-21)
+### Feature
+* add `contains` methods ([`6d5a604`](https://github.com/MicaelJarniac/timeranges/commit/6d5a604e8588de3ee0b0ab7d53add0bce39f2878))
+
 ## v0.6.0 (2021-12-20)
 ### Feature
 * interpolate to `time.max` ([`dde5de0`](https://github.com/MicaelJarniac/timeranges/commit/dde5de017345638f5657e902b12ff4ba22d570ed))

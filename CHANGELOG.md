@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.1 (2021-12-22)
+### Fix
+* compatible only with Python >= 3.8 ([`d90c9a4`](https://github.com/MicaelJarniac/timeranges/commit/d90c9a48f008cf4fd52eec03c7eb291c99a2f1b6))
+
 ## v0.7.0 (2021-12-21)
 ### Feature
 * add `contains` methods ([`6d5a604`](https://github.com/MicaelJarniac/timeranges/commit/6d5a604e8588de3ee0b0ab7d53add0bce39f2878))

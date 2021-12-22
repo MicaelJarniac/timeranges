@@ -1,6 +1,8 @@
+from datetime import datetime, time, timedelta, timezone
+
 from pytest import raises
-from datetime import time, datetime, timedelta, timezone
 from timematic.enums import Weekday
+
 from timeranges import TimeRange, TimeRanges, WeekRange
 
 

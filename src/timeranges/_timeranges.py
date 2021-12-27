@@ -94,6 +94,8 @@ class TimeRanges:
         self.validate()
 
     def contains(self, t: time) -> bool:
+        if self.time_ranges == []:
+            return True
         return any(t in time_range for time_range in self.time_ranges)
 
     def __contains__(self, t: time) -> bool:
@@ -120,6 +122,8 @@ class WeekRange:
         tz = self.timezone
         if tz is not None:
             dt = dt.astimezone(tz)
+        if self.day_ranges == {}:
+            return True
         weekday = Weekday.from_datetime(dt)
         day_range = self.day_ranges.get(weekday)
         if day_range is not None:

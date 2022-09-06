@@ -1,6 +1,6 @@
 from copy import deepcopy
 from datetime import datetime, time, timedelta, tzinfo
-from typing import Dict, List, Optional, TypeVar
+from typing import Dict, List, Optional, TypeVar, Union
 
 import attr
 from timematic.enums import Weekday
@@ -46,11 +46,23 @@ class TimeRange:
     def __attrs_post_init__(self) -> None:
         self.validate()
 
-    def contains(self, t: time) -> bool:
-        return self.start <= t <= self.end
+    def _contains_time(self, other: time, /) -> bool:
+        return self.start <= other <= self.end
 
-    def __contains__(self, t: time) -> bool:
-        return self.contains(t)
+    def _contains_time_range(self, other: "TimeRange", /) -> bool:
+        sct = self._contains_time
+        return sct(other.start) and sct(other.end)
+
+    def contains(self, other: Union[time, "TimeRange"], /) -> bool:
+        if isinstance(other, time):
+            return self._contains_time(other)
+        if isinstance(other, TimeRange):
+            return self._contains_time_range(other)
+
+        raise TypeError
+
+    def __contains__(self, other: Union[time, "TimeRange"]) -> bool:
+        return self.contains(other)
 
 
 @attr.define
@@ -93,11 +105,29 @@ class TimeRanges:
     def __attrs_post_init__(self) -> None:
         self.validate()
 
-    def contains(self, t: time) -> bool:
-        return any(t in time_range for time_range in self.time_ranges)
+    def _contains_time(self, other: time, /) -> bool:
+        return any(other in time_range for time_range in self.time_ranges)
 
-    def __contains__(self, t: time) -> bool:
-        return self.contains(t)
+    def _contains_time_range(self, other: TimeRange, /) -> bool:
+        return any(other in time_range for time_range in self.time_ranges)
+
+    def _contains_time_ranges(self, other: "TimeRanges", /) -> bool:
+        return all(
+            self._contains_time_range(time_range) for time_range in other.time_ranges
+        )
+
+    def contains(self, other: Union[time, TimeRange, "TimeRanges"], /) -> bool:
+        if isinstance(other, time):
+            return self._contains_time(other)
+        if isinstance(other, TimeRange):
+            return self._contains_time_range(other)
+        if isinstance(other, TimeRanges):
+            return self._contains_time_ranges(other)
+
+        raise TypeError
+
+    def __contains__(self, other: Union[time, TimeRange, "TimeRanges"]) -> bool:
+        return self.contains(other)
 
 
 @attr.define

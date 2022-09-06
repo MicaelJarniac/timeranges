@@ -1,6 +1,6 @@
 from copy import deepcopy
 from datetime import datetime, time, timedelta, tzinfo
-from typing import Dict, List, Optional, TypeVar, Union
+from typing import ClassVar, Dict, List, Optional, TypeVar, Union
 
 import attr
 from timematic.enums import Weekday
@@ -53,7 +53,9 @@ class TimeRange:
         sct = self._contains_time
         return sct(other.start) and sct(other.end)
 
-    def contains(self, other: Union[time, "TimeRange"], /) -> bool:
+    _contains_types = Union[time, "TimeRange"]
+
+    def contains(self, other: _contains_types, /) -> bool:
         if isinstance(other, time):
             return self._contains_time(other)
         if isinstance(other, TimeRange):
@@ -61,7 +63,7 @@ class TimeRange:
 
         raise TypeError
 
-    def __contains__(self, other: Union[time, "TimeRange"]) -> bool:
+    def __contains__(self, other: _contains_types) -> bool:
         return self.contains(other)
 
 
@@ -116,7 +118,9 @@ class TimeRanges:
             self._contains_time_range(time_range) for time_range in other.time_ranges
         )
 
-    def contains(self, other: Union[time, TimeRange, "TimeRanges"], /) -> bool:
+    _contains_types = Union[time, TimeRange, "TimeRanges"]
+
+    def contains(self, other: _contains_types, /) -> bool:
         if isinstance(other, time):
             return self._contains_time(other)
         if isinstance(other, TimeRange):
@@ -126,7 +130,7 @@ class TimeRanges:
 
         raise TypeError
 
-    def __contains__(self, other: Union[time, TimeRange, "TimeRanges"]) -> bool:
+    def __contains__(self, other: _contains_types) -> bool:
         return self.contains(other)
 
 
@@ -146,15 +150,35 @@ class WeekRange:
     def __attrs_post_init__(self) -> None:
         self.validate()
 
-    def contains(self, dt: datetime) -> bool:
+    def _contains_datetime(self, other: datetime) -> bool:
         tz = self.timezone
         if tz is not None:
-            dt = dt.astimezone(tz)
-        weekday = Weekday.from_datetime(dt)
+            other = other.astimezone(tz)
+        weekday = Weekday.from_datetime(other)
         day_range = self.day_ranges.get(weekday)
         if day_range is not None:
-            return dt.time() in day_range
+            return other.time() in day_range
         return False
 
-    def __contains__(self, dt: datetime) -> bool:
-        return self.contains(dt)
+    def _contains_week_range(self, other: "WeekRange") -> bool:
+        # FIXME Deal with timezones
+        try:
+            return all(
+                day_range in self.day_ranges[weekday]
+                for weekday, day_range in other.day_ranges.items()
+            )
+        except KeyError:
+            return False
+
+    _contains_types = Union[datetime, "WeekRange"]
+
+    def contains(self, other: _contains_types) -> bool:
+        if isinstance(other, datetime):
+            return self._contains_datetime(other)
+        if isinstance(other, WeekRange):
+            return self._contains_week_range(other)
+
+        raise TypeError
+
+    def __contains__(self, other: _contains_types) -> bool:
+        return self.contains(other)

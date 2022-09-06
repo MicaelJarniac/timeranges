@@ -161,7 +161,11 @@ class WeekRange:
         return False
 
     def _contains_week_range(self, other: "WeekRange") -> bool:
-        # FIXME Deal with timezones
+        if self.timezone != other.timezone:
+            raise ValueError(
+                f"Incompatible timezones ({self.timezone} and {other.timezone})"
+            )
+
         try:
             return all(
                 day_range in self.day_ranges[weekday]

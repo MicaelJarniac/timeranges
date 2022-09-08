@@ -1,6 +1,6 @@
 from copy import deepcopy
 from datetime import datetime, time, timedelta, tzinfo
-from typing import ClassVar, Dict, List, Optional, TypeVar, Union
+from typing import Dict, List, Optional, TypeVar, Union
 
 import attr
 from timematic.enums import Weekday

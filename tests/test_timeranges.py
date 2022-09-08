@@ -23,7 +23,7 @@ def test_timerange_invalid():
     assert tr == TimeRange(time(1), time(2))
 
 
-def test_timerange_contains():
+def test_timerange_contains_time():
     timerange = TimeRange(time(2), time(4))
     yes = [time(2), time(3), time(4)]
     no = [time(1), time(5)]
@@ -37,7 +37,7 @@ def test_timerange_contains():
         assert not timerange.contains(t)
 
 
-def test_timeranges_contains():
+def test_timeranges_contains_time():
     timeranges = TimeRanges(
         [
             TimeRange(time(2), time(4)),
@@ -54,3 +54,27 @@ def test_timeranges_contains():
     for t in no:
         assert t not in timeranges
         assert not timeranges.contains(t)
+
+
+def test_timerange_contains_timerange():
+    timerange = TimeRange(time(2), time(8))
+    yes = [
+        TimeRange(time(3), time(4)),
+        TimeRange(time(5), time(8)),
+        TimeRange(time(2), time(8)),
+    ]
+    no = [
+        TimeRange(time(1), time(3)),
+        TimeRange(time(3), time(9)),
+        TimeRange(time(1), time(9)),
+    ]
+
+    for tr in yes:
+        assert tr in timerange
+        assert timerange.contains(tr)
+        assert timerange._contains_time_range(tr)
+
+    for tr in no:
+        assert tr not in timerange
+        assert not timerange.contains(tr)
+        assert not timerange._contains_time_range(tr)

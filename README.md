@@ -159,7 +159,7 @@ week_range = WeekRange(
                 TimeRange(time(0), time(2)),
                 TimeRange(time(4), time(8)),
             ]
-        )
+        ),
     }
 )
 

@@ -249,3 +249,6 @@ class WeekRange(BaseRange):
 
     def __and__(self, other: "WeekRange") -> "WeekRange":
         return self.intersection(other)
+
+    def has_transition(self, other: "WeekRange") -> bool:
+        return bool(other not in self and other & self)

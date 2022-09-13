@@ -1,5 +1,5 @@
 -r docs/requirements.txt
-black==21.9b0
+black==22.8.0
 build==0.7.0
 coverage==6.0.1
 flake8==3.9.2

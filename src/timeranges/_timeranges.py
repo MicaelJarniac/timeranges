@@ -1,16 +1,20 @@
-from copy import deepcopy
+from collections import defaultdict
+from copy import copy, deepcopy
 from datetime import datetime, time, timedelta, tzinfo
-from typing import Dict, List, Optional, TypeVar, Union
+from itertools import product
+from typing import DefaultDict, Dict, List, Optional, TypeVar, Union
 
 import attr
 from timematic.enums import Weekday
 from timematic.utils import subtract_times
 
+from ._base import BaseRange
+
 _T_TimeRange = TypeVar("_T_TimeRange", bound="TimeRange")
 
 
 @attr.define(order=True, on_setattr=attr.setters.validate)
-class TimeRange:
+class TimeRange(BaseRange):
     def _validate_start(
         instance: _T_TimeRange, attribute: attr.Attribute, start: time
     ) -> None:
@@ -28,7 +32,7 @@ class TimeRange:
     end: time = attr.ib(default=time.max, order=False, validator=_validate_end)
 
     @staticmethod
-    def _validate_time(time: time) -> None:
+    def _validate_time(time: time, /) -> None:
         if time.tzinfo is not None:
             raise ValueError(f"Time {time} has timezone info")
 
@@ -58,17 +62,25 @@ class TimeRange:
     def contains(self, other: _contains_types, /) -> bool:
         if isinstance(other, time):
             return self._contains_time(other)
-        if isinstance(other, TimeRange):
+        elif isinstance(other, TimeRange):
             return self._contains_time_range(other)
-
-        raise TypeError
+        else:
+            raise TypeError
 
     def __contains__(self, other: _contains_types) -> bool:
         return self.contains(other)
 
+    def intersection(self, other: "TimeRange", /) -> Optional["TimeRange"]:
+        start = max(self.start, other.start)
+        end = min(self.end, other.end)
+        return TimeRange(start, end) if start <= end else None
+
+    def __and__(self, other: "TimeRange") -> Optional["TimeRange"]:
+        return self.intersection(other)
+
 
 @attr.define
-class TimeRanges:
+class TimeRanges(BaseRange):
     time_ranges: List[TimeRange] = attr.Factory(list)
 
     def validate(self) -> None:
@@ -107,6 +119,9 @@ class TimeRanges:
     def __attrs_post_init__(self) -> None:
         self.validate()
 
+    def __bool__(self) -> bool:
+        return bool(self.time_ranges)
+
     def _contains_time(self, other: time, /) -> bool:
         return any(other in time_range for time_range in self.time_ranges)
 
@@ -123,20 +138,46 @@ class TimeRanges:
     def contains(self, other: _contains_types, /) -> bool:
         if isinstance(other, time):
             return self._contains_time(other)
-        if isinstance(other, TimeRange):
+        elif isinstance(other, TimeRange):
             return self._contains_time_range(other)
-        if isinstance(other, TimeRanges):
+        elif isinstance(other, TimeRanges):
             return self._contains_time_ranges(other)
-
-        raise TypeError
+        else:
+            raise TypeError
 
     def __contains__(self, other: _contains_types) -> bool:
         return self.contains(other)
 
+    def union(self, other: "TimeRanges", /) -> "TimeRanges":
+        time_ranges_list = self.time_ranges + other.time_ranges
+        time_ranges = TimeRanges(time_ranges_list)
+        time_ranges.merge()
+        return time_ranges
 
-@attr.define
-class WeekRange:
-    day_ranges: Dict[Weekday, TimeRanges] = attr.Factory(dict)
+    def __or__(self, other: "TimeRanges") -> "TimeRanges":
+        return self.union(other) if isinstance(other, TimeRanges) else NotImplemented
+
+    def intersection(self, other: "TimeRanges", /) -> "TimeRanges":
+        time_ranges_list: List[Optional[TimeRange]] = [
+            a & b for a, b in product(self.time_ranges, other.time_ranges)
+        ]
+
+        time_ranges = TimeRanges([tr for tr in time_ranges_list if tr is not None])
+        time_ranges.merge()
+        return time_ranges
+
+    def __and__(self, other: "TimeRanges") -> "TimeRanges":
+        return self.intersection(other)
+
+
+@attr.define(on_setattr=attr.setters.convert)
+class WeekRange(BaseRange):
+    def _convert_day_ranges(day_ranges: Dict[Weekday, TimeRanges]) -> DefaultDict[Weekday, TimeRanges]:  # type: ignore
+        return defaultdict(TimeRanges, day_ranges)
+
+    day_ranges: DefaultDict[Weekday, TimeRanges] = attr.ib(
+        factory=dict, converter=_convert_day_ranges
+    )
     timezone: Optional[tzinfo] = None
 
     def validate(self) -> None:
@@ -150,39 +191,61 @@ class WeekRange:
     def __attrs_post_init__(self) -> None:
         self.validate()
 
-    def _contains_datetime(self, other: datetime) -> bool:
+    def __bool__(self) -> bool:
+        return any(self.day_ranges.values())
+
+    def _assert_timezone(self, other: "WeekRange", /) -> None:
+        if (tz := self.timezone) != (otz := other.timezone):
+            raise ValueError(f"Different timezones ({tz} and {otz})")
+
+    def _contains_datetime(self, other: datetime, /) -> bool:
         tz = self.timezone
         if tz is not None:
             other = other.astimezone(tz)
         weekday = Weekday.from_datetime(other)
-        day_range = self.day_ranges.get(weekday)
-        if day_range is not None:
-            return other.time() in day_range
-        return False
+        return other.time() in self.day_ranges[weekday]
 
-    def _contains_week_range(self, other: "WeekRange") -> bool:
-        if self.timezone != other.timezone:
-            raise ValueError(
-                f"Incompatible timezones ({self.timezone} and {other.timezone})"
-            )
+    def _contains_week_range(self, other: "WeekRange", /) -> bool:
+        self._assert_timezone(other)
 
-        try:
-            return all(
-                day_range in self.day_ranges[weekday]
-                for weekday, day_range in other.day_ranges.items()
-            )
-        except KeyError:
-            return False
+        return all(
+            day_range in self.day_ranges[weekday]
+            for weekday, day_range in other.day_ranges.items()
+        )
 
     _contains_types = Union[datetime, "WeekRange"]
 
-    def contains(self, other: _contains_types) -> bool:
+    def contains(self, other: _contains_types, /) -> bool:
         if isinstance(other, datetime):
             return self._contains_datetime(other)
-        if isinstance(other, WeekRange):
+        elif isinstance(other, WeekRange):
             return self._contains_week_range(other)
-
-        raise TypeError
+        else:
+            raise TypeError
 
     def __contains__(self, other: _contains_types) -> bool:
         return self.contains(other)
+
+    def union(self, other: "WeekRange", /) -> "WeekRange":
+        self._assert_timezone(other)
+
+        day_ranges = copy(self.day_ranges)
+        for weekday, day_range in other.day_ranges.items():
+            day_ranges[weekday] |= day_range
+
+        return WeekRange(day_ranges, timezone=self.timezone)
+
+    def __or__(self, other: "WeekRange") -> "WeekRange":
+        return self.union(other) if isinstance(other, WeekRange) else NotImplemented
+
+    def intersection(self, other: "WeekRange", /) -> "WeekRange":
+        self._assert_timezone(other)
+
+        week_range = WeekRange(timezone=self.timezone)
+        for weekday, day_range in self.day_ranges.items():
+            week_range.day_ranges[weekday] = day_range & other.day_ranges[weekday]
+
+        return week_range
+
+    def __and__(self, other: "WeekRange") -> "WeekRange":
+        return self.intersection(other)

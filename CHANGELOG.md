@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.0 (2022-09-14)
+### Feature
+* ranges for `datetime`, better `contains`, intersection, union, transition (#19) ([#20](https://github.com/MicaelJarniac/timeranges/issues/20)) ([`0020582`](https://github.com/MicaelJarniac/timeranges/commit/0020582cc9103e934af5f11ac9885778a09fe802))
+
 ## v0.7.1 (2021-12-22)
 ### Fix
 * compatible only with Python >= 3.8 ([`d90c9a4`](https://github.com/MicaelJarniac/timeranges/commit/d90c9a48f008cf4fd52eec03c7eb291c99a2f1b6))

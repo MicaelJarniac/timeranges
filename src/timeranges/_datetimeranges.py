@@ -89,6 +89,7 @@ class DatetimeRange(BaseRange):
 
         d = date_start
         while d <= date_end:
+            # TODO Skip unnecessary iterations if week is already full
             tr_start: Optional[time] = None
             tr_end: Optional[time] = None
             if d == date_start:

@@ -1,4 +1,5 @@
 from datetime import datetime, time, timedelta, timezone
+from typing import Tuple
 
 from pytest import raises
 from timematic.enums import Weekday
@@ -10,7 +11,12 @@ def test_timerange_invalid():
     with raises(ValueError):
         TimeRange(time(2), time(1))
     with raises(ValueError):
-        TimeRange(time(1), time(2, tzinfo=timezone(timedelta(1))))
+        TimeRange(
+            time(1, tzinfo=timezone(timedelta(hours=2))),
+            time(2, tzinfo=timezone(timedelta(hours=1))),
+        )
+    with raises(TypeError):
+        TimeRange(time(1), time(2, tzinfo=timezone(timedelta(hours=1))))
     with raises(ValueError):
         tz = timezone(timedelta(1))
         TimeRange(time(1, tzinfo=tz), time(2, tzinfo=tz))
@@ -21,6 +27,13 @@ def test_timerange_invalid():
     with raises(ValueError):
         tr.end = time(0)
     assert tr == TimeRange(time(1), time(2))
+
+
+def test_timerange_contains_invalid():
+    timerange = TimeRange(time(2), time(4))
+
+    with raises(TypeError):
+        1 in timerange
 
 
 def test_timerange_contains_time():
@@ -78,3 +91,26 @@ def test_timerange_contains_timerange():
         assert tr not in timerange
         assert not timerange.contains(tr)
         assert not timerange._contains_time_range(tr)
+
+
+def test_has_transition():
+    def _make_week_range(interval: Tuple[int, int], /) -> WeekRange:
+        s, e = interval
+        return WeekRange({Weekday.MONDAY: TimeRanges([TimeRange(time(s), time(e))])})
+
+    yes = [_make_week_range(interval) for interval in [(3, 5), (6, 8), (3, 8)]]
+    no = [_make_week_range(interval) for interval in [(5, 6), (3, 4)]]
+
+    target = WeekRange(
+        {
+            Weekday.MONDAY: TimeRanges(
+                [TimeRange(time(2), time(4)), TimeRange(time(7), time(9))]
+            )
+        }
+    )
+
+    for wr in yes:
+        assert target.has_transition(wr)
+
+    for wr in no:
+        assert not target.has_transition(wr)

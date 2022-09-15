@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.1 (2022-09-15)
+### Fix
+* compare timezones by offset ([`fb06b76`](https://github.com/MicaelJarniac/timeranges/commit/fb06b7622f078d4c467361c072d4b35dae37215c))
+
 ## v1.0.0 (2022-09-15)
 ### Feature
 * move to_week_range, better has_transition ([`074d7d7`](https://github.com/MicaelJarniac/timeranges/commit/074d7d7ee2770d3b7c451f8b5cefafd6dee502f5))

@@ -1,6 +1,6 @@
 """Time ranges."""
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 from ._datetimeranges import DatetimeRange, DatetimeRanges
 from ._timeranges import TimeRange, TimeRanges, WeekRange

@@ -197,8 +197,18 @@ class WeekRange(BaseRange):
         return any(self.day_ranges.values())
 
     def _assert_timezone(self, other: "WeekRange", /) -> None:
-        if (tz := self.timezone) != (otz := other.timezone):
-            raise ValueError(f"Different timezones ({tz} and {otz})")
+        tz = self.timezone
+        otz = other.timezone
+        # FIXME This isn't the best way to do it, but `pytz` is pain
+        if tz == otz:
+            return
+        elif (
+            tz is not None
+            and otz is not None
+            and tz.utcoffset(datetime.min) == otz.utcoffset(datetime.min)
+        ):
+            return
+        raise ValueError(f"Incompatible timezones ({tz} and {otz})")
 
     def _contains_datetime(self, other: datetime, /) -> bool:
         tz = self.timezone

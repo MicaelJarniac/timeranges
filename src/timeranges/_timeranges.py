@@ -1,14 +1,16 @@
 from collections import defaultdict
 from copy import copy, deepcopy
 from datetime import datetime, time, timedelta, tzinfo
+from functools import reduce
 from itertools import product
-from typing import DefaultDict, Dict, List, Optional, TypeVar, Union
+from typing import DefaultDict, Dict, List, Optional, Type, TypeVar, Union
 
 import attr
 from timematic.enums import Weekday
 from timematic.utils import subtract_times
 
 from ._base import BaseRange
+from ._datetimeranges import DatetimeRange, DatetimeRanges
 
 _T_TimeRange = TypeVar("_T_TimeRange", bound="TimeRange")
 
@@ -250,5 +252,78 @@ class WeekRange(BaseRange):
     def __and__(self, other: "WeekRange") -> "WeekRange":
         return self.intersection(other)
 
-    def has_transition(self, other: "WeekRange") -> bool:
+    _has_transition_types = Union["WeekRange", DatetimeRange, DatetimeRanges]
+
+    def _has_transition_week_range(self, other: "WeekRange") -> bool:
         return bool(other not in self and other & self)
+
+    def _has_transition_datetime_range(self, other: DatetimeRange) -> bool:
+        other_week_range = WeekRange.from_datetime_range(
+            other, replace_timezone=self.timezone
+        )
+        return self._has_transition_week_range(other_week_range)
+
+    def _has_transition_datetime_ranges(self, other: DatetimeRanges) -> bool:
+        other_week_range = WeekRange.from_datetime_ranges(
+            other, replace_timezone=self.timezone
+        )
+        return self._has_transition_week_range(other_week_range)
+
+    def has_transition(self, other: _has_transition_types) -> bool:
+        if isinstance(other, WeekRange):
+            return self._has_transition_week_range(other)
+        elif isinstance(other, DatetimeRange):
+            return self._has_transition_datetime_range(other)
+        elif isinstance(other, DatetimeRanges):
+            return self._has_transition_datetime_ranges(other)
+        else:
+            raise TypeError
+
+    @classmethod
+    def from_datetime_range(
+        cls, datetime_range: DatetimeRange, /, replace_timezone: Optional[tzinfo] = None
+    ) -> "WeekRange":
+        start = datetime_range.start
+        if replace_timezone is not None:
+            start = start.astimezone(replace_timezone)
+
+        tz = start.tzinfo
+        end = datetime_range.end.astimezone(tz)
+
+        date_start = start.date()
+        date_end = end.date()
+
+        week_range = cls(timezone=tz)
+
+        d = date_start
+        while d <= date_end:
+            # TODO Skip unnecessary iterations if week is already full
+            tr_start: Optional[time] = None
+            tr_end: Optional[time] = None
+            if d == date_start:
+                tr_start = start.time()
+            if d == date_end:
+                tr_end = end.time()
+
+            time_range = TimeRange()
+            if tr_start is not None:
+                time_range.start = tr_start
+            if tr_end is not None:
+                time_range.end = tr_end
+
+            week_range.day_ranges[Weekday(d.weekday())] = TimeRanges([time_range])
+
+            d += timedelta(days=1)
+
+        return week_range
+
+    @classmethod
+    def from_datetime_ranges(
+        cls, datetime_ranges: DatetimeRanges, replace_timezone: Optional[tzinfo] = None
+    ) -> "WeekRange":
+        week_ranges: list["WeekRange"] = [
+            cls.from_datetime_range(datetime_range, replace_timezone=replace_timezone)
+            for datetime_range in datetime_ranges.datetime_ranges
+        ]
+
+        return reduce(lambda a, b: a | b, week_ranges)

@@ -1,13 +1,10 @@
 from copy import deepcopy
-from datetime import datetime, time, timedelta, timezone, tzinfo
-from functools import reduce
-from typing import List, Optional, TypeVar, Union
+from datetime import datetime, time, timedelta, timezone
+from typing import List, TypeVar, Union
 
 import attr
-from timematic.enums import Weekday
 
 from ._base import BaseRange
-from ._timeranges import TimeRange, TimeRanges, WeekRange
 
 _T_DatetimeRange = TypeVar("_T_DatetimeRange", bound="DatetimeRange")
 
@@ -73,41 +70,6 @@ class DatetimeRange(BaseRange):
 
     def __contains__(self, other: _contains_types) -> bool:
         return self.contains(other)
-
-    def to_week_range(self, replace_timezone: Optional[tzinfo] = None) -> WeekRange:
-        start = self.start
-        if replace_timezone is not None:
-            start = start.astimezone(replace_timezone)
-
-        tz = start.tzinfo
-        end = self.end.astimezone(tz)
-
-        date_start = start.date()
-        date_end = end.date()
-
-        week_range = WeekRange(timezone=tz)
-
-        d = date_start
-        while d <= date_end:
-            # TODO Skip unnecessary iterations if week is already full
-            tr_start: Optional[time] = None
-            tr_end: Optional[time] = None
-            if d == date_start:
-                tr_start = start.time()
-            if d == date_end:
-                tr_end = end.time()
-
-            time_range = TimeRange()
-            if tr_start is not None:
-                time_range.start = tr_start
-            if tr_end is not None:
-                time_range.end = tr_end
-
-            week_range.day_ranges[Weekday(d.weekday())] = TimeRanges([time_range])
-
-            d += timedelta(days=1)
-
-        return week_range
 
 
 @attr.define
@@ -177,10 +139,3 @@ class DatetimeRanges(BaseRange):
 
     def __contains__(self, other: _contains_types) -> bool:
         return self.contains(other)
-
-    def to_week_range(self, replace_timezone: Optional[tzinfo] = None) -> WeekRange:
-        week_ranges: list[WeekRange] = []
-        for datetime_range in self.datetime_ranges:
-            week_ranges.append(datetime_range.to_week_range(replace_timezone))
-
-        return reduce(lambda a, b: a | b, week_ranges)

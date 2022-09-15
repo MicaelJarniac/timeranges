@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.0 (2022-09-15)
+### Feature
+* move to_week_range, better has_transition ([`074d7d7`](https://github.com/MicaelJarniac/timeranges/commit/074d7d7ee2770d3b7c451f8b5cefafd6dee502f5))
+* ranges for `datetime`, better `contains`, intersection, union, transition ([#19](https://github.com/MicaelJarniac/timeranges/issues/19)) ([`7521f1d`](https://github.com/MicaelJarniac/timeranges/commit/7521f1dfb202404ebd4d58c9263dd6806899bd59))
+
+### Breaking
+* Removed `DatetimeRange[s].to_week_range`  ([`074d7d7`](https://github.com/MicaelJarniac/timeranges/commit/074d7d7ee2770d3b7c451f8b5cefafd6dee502f5))
+
 ## v0.8.0 (2022-09-14)
 ### Feature
 * ranges for `datetime`, better `contains`, intersection, union, transition (#19) ([#20](https://github.com/MicaelJarniac/timeranges/issues/20)) ([`0020582`](https://github.com/MicaelJarniac/timeranges/commit/0020582cc9103e934af5f11ac9885778a09fe802))

@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.2 (2022-09-15)
+### Fix
+* datetime.min was a bad idea, using 2000-01-01 ([`6bd6c88`](https://github.com/MicaelJarniac/timeranges/commit/6bd6c8864ce23e5d60880bcc6c33bead0c2a5118))
+
 ## v1.0.1 (2022-09-15)
 ### Fix
 * compare timezones by offset ([`fb06b76`](https://github.com/MicaelJarniac/timeranges/commit/fb06b7622f078d4c467361c072d4b35dae37215c))

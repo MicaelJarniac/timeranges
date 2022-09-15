@@ -199,13 +199,14 @@ class WeekRange(BaseRange):
     def _assert_timezone(self, other: "WeekRange", /) -> None:
         tz = self.timezone
         otz = other.timezone
+        ref = datetime(2000, 1, 1)
         # FIXME This isn't the best way to do it, but `pytz` is pain
         if tz == otz:
             return
         elif (
             tz is not None
             and otz is not None
-            and tz.utcoffset(datetime.min) == otz.utcoffset(datetime.min)
+            and tz.utcoffset(ref) == otz.utcoffset(ref)
         ):
             return
         raise ValueError(f"Incompatible timezones ({tz} and {otz})")

@@ -3,7 +3,8 @@ from copy import copy, deepcopy
 from datetime import datetime, time, timedelta, tzinfo
 from functools import reduce
 from itertools import product
-from typing import DefaultDict, Dict, List, Optional, Type, TypeVar, Union
+from typing import DefaultDict, Dict, List, Optional, Type, TypeVar, Union, Iterator
+from collections.abc import MutableMapping
 
 import attr
 from timematic.enums import Weekday
@@ -81,6 +82,9 @@ class TimeRange(BaseRange):
         return self.intersection(other)
 
 
+_TimeRanges_contains_types = Union[time, TimeRange, "TimeRanges"]
+
+
 @attr.define
 class TimeRanges(BaseRange):
     time_ranges: List[TimeRange] = attr.Factory(list)
@@ -135,9 +139,7 @@ class TimeRanges(BaseRange):
             self._contains_time_range(time_range) for time_range in other.time_ranges
         )
 
-    _contains_types = Union[time, TimeRange, "TimeRanges"]
-
-    def contains(self, other: _contains_types, /) -> bool:
+    def contains(self, other: _TimeRanges_contains_types, /) -> bool:
         if isinstance(other, time):
             return self._contains_time(other)
         elif isinstance(other, TimeRange):
@@ -147,7 +149,7 @@ class TimeRanges(BaseRange):
         else:
             raise TypeError
 
-    def __contains__(self, other: _contains_types) -> bool:
+    def __contains__(self, other: _TimeRanges_contains_types) -> bool:
         return self.contains(other)
 
     def union(self, other: "TimeRanges", /) -> "TimeRanges":
@@ -338,3 +340,39 @@ class WeekRange(BaseRange):
         ]
 
         return reduce(lambda a, b: a | b, week_ranges)
+
+
+T = TypeVar("T")
+
+
+# https://stackoverflow.com/a/19775773/11521074
+@attr.define
+class TimeMap(MutableMapping[TimeRanges, T]):
+    time_map: Dict[TimeRanges, T] = attr.Factory(dict)
+
+    def __getitem__(self, __key: _TimeRanges_contains_types) -> T:
+        for k, v in self.time_map.items():
+            if __key in k:
+                return v
+        raise KeyError(__key)
+
+    def __setitem__(self, __key: TimeRanges, __value: T) -> None:
+        if not isinstance(__key, TimeRanges):
+            raise TypeError(
+                f"Expected key of type {TimeRanges}, got {type(__key)} instead"
+            )
+        # TODO Add logic for detecting and merging overlaps
+        self.time_map[__key] = __value
+
+    def __delitem__(self, __key: _TimeRanges_contains_types) -> None:
+        for k in self.time_map.keys():
+            if __key in k:
+                del self.time_map[k]
+                return
+        raise KeyError(__key)
+
+    def __iter__(self) -> Iterator[TimeRanges]:
+        yield from self.time_map.keys()
+
+    def __len__(self) -> int:
+        return len(self.time_map)

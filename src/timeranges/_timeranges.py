@@ -1,10 +1,10 @@
 from collections import defaultdict
+from collections.abc import MutableMapping
 from copy import copy, deepcopy
 from datetime import datetime, time, timedelta, tzinfo
 from functools import reduce
 from itertools import product
-from typing import DefaultDict, Dict, List, Optional, Type, TypeVar, Union, Iterator
-from collections.abc import MutableMapping
+from typing import DefaultDict, Dict, Iterator, List, Optional, Type, TypeVar, Union
 
 import attr
 from timematic.enums import Weekday
